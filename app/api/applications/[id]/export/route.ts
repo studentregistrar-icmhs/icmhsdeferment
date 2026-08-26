@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { neon } from '@neondatabase/serverless';
 import { PDFDocument, StandardFonts, rgb, PDFFont, PDFPage } from 'pdf-lib';
-import { ICMHS_LOGO_BASE64 } from '../../../../../lib/icmhs-logo';
+//import { ICMHS_LOGO_BASE64 } from '../../../../../lib/icmhs-logo';
 
 // If your project doesn't use the "@/..." path alias, change the import
 // above to a relative path, e.g. '../../../../../lib/icmhs-logo'.
@@ -43,7 +43,7 @@ export async function GET(
   const { width, height } = page.getSize();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const logoImg = await pdfDoc.embedPng(Buffer.from(ICMHS_LOGO_BASE64, 'base64'));
+  //const logoImg = await pdfDoc.embedPng(Buffer.from(ICMHS_LOGO_BASE64, 'base64'));
 
   const marginX = 50;
   const lineColor = rgb(0.6, 0.6, 0.6);
