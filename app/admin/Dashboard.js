@@ -126,10 +126,21 @@ function Entry({ record, open, onToggle, onUpdated }) {
           <div className="review-controls">
             <label>Reviewer notes</label>
             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Internal notes for this request" />
-            <div className="action-row">
+            <div className="action-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <button className="approve" disabled={saving} onClick={() => setStatus("approved")}>Approve</button>
               <button className="deny" disabled={saving} onClick={() => setStatus("denied")}>Deny</button>
               <button className="reset" disabled={saving} onClick={() => setStatus("pending")}>Reset to Pending</button>
+              
+              {/* PDF EXPORT BUTTON INTEGRATION */}
+              <a
+                href={`/api/applications/${record.id}/export`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none' }}
+              >
+                <button type="button" style={{ cursor: 'pointer' }}>Export PDF</button>
+              </a>
+
               {err && <span className="err">{err}</span>}
             </div>
           </div>
