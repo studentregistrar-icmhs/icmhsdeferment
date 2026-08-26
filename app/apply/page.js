@@ -59,7 +59,7 @@ export default function ApplyPage() {
         <div className="confirm">
           <div className="stamp">On<br />File</div>
           <h3>Request received</h3>
-          <p>Your deferment request has been logged with the ICMHS Office of Admissions &amp; Records.</p>
+          <p>Your deferment request has been received at the ICMHS Registrars Office</p>
           <p className="id">Reference number: {confirmedId}</p>
           <div style={{ marginTop: 18 }}>
             <button
@@ -92,7 +92,7 @@ export default function ApplyPage() {
                 <input type="text" required value={form.fullName} onChange={(e) => update("fullName", e.target.value)} />
               </div>
               <div className="field">
-                <label>Admission Number</label>
+                <label>Admission Number <span className="req">*</span></label>
                 <input type="text" placeholder="DPTT/S-0000/IC/26" required value={form.studentId} onChange={(e) => update("studentId", e.target.value)} />
               </div>
             </div>
