@@ -9,7 +9,15 @@ export async function PATCH(request, context) {
   const cookieStore = await cookies();
   const session = cookieStore.get(SESSION_COOKIE)?.value;
 
-  if (!isValidSessionCookie(session)) {
+  let authed = false;
+  try {
+    authed = isValidSessionCookie(session);
+  } catch (err) {
+    console.error("Session check failed (likely missing SESSION_SECRET):", err);
+    return NextResponse.json({ error: "Server is not fully configured yet." }, { status: 500 });
+  }
+
+  if (!authed) {
     return NextResponse.json({ error: "Not authorized." }, { status: 401 });
   }
 
