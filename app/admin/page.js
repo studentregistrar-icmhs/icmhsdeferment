@@ -9,7 +9,14 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   const cookieStore = await cookies();
   const session = cookieStore.get(SESSION_COOKIE)?.value;
-  const authed = isValidSessionCookie(session);
+
+  let authed = false;
+  try {
+    authed = isValidSessionCookie(session);
+  } catch (err) {
+    console.error("Session check failed (likely missing SESSION_SECRET):", err);
+    authed = false;
+  }
 
   return (
     <div className="wrap">
