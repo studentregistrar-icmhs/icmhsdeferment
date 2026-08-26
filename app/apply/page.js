@@ -88,12 +88,12 @@ export default function ApplyPage() {
             <h2>Applicant Information</h2>
             <div className="row">
               <div className="field">
-                <label>Full legal name <span className="req">*</span></label>
+                <label>Full Name <span className="req">*</span></label>
                 <input type="text" required value={form.fullName} onChange={(e) => update("fullName", e.target.value)} />
               </div>
               <div className="field">
-                <label>Applicant / Student ID</label>
-                <input type="text" placeholder="Leave blank if not yet issued" value={form.studentId} onChange={(e) => update("studentId", e.target.value)} />
+                <label>Admission Number</label>
+                <input type="text" placeholder="DPTT/S-0000/IC/26" required value={form.studentId} onChange={(e) => update("studentId", e.target.value)} />
               </div>
             </div>
             <div className="row">
@@ -120,21 +120,19 @@ export default function ApplyPage() {
                   <option>Diploma in Kenya Registered Community Health Nursing</option>
                   <option>Diploma in Biomedical Engineering Technology</option>
                   <option>Diploma in Perioperative Theatre Technology</option>
-                  <option>Diploma in Medical Laboratory Sciences</option>
                   <option>Diploma in Human Nutrition and Dietetics</option>
-                  <option>Diploma in Physiotherapy</option>
                   <option>Diploma in Health Records and Information Technology</option>
                   <option>Diploma in Community Health</option>
                   <option>Diploma in Counseling Psychology</option>
                   <option>Diploma in Social Work and Community Development</option>
-                  <option>Diploma in Mortuary Science</option>
                   <option>Diploma in Information Technology</option>
                 </optgroup>
                 <optgroup label="Certificate Programs">
                   <option>Certificate in Community Health</option>
-                  <option>Certificate in Counselling Psychology</option>
-                  <option>Certificate in Food Technology</option>
+                  <option>Certificate in Perioperative Theatre Technology</option>
+                  <option>Certificate in Health Records and Information Technology</option>
                   <option>Certificate in Science Laboratory Technology</option>
+                  <option>Certificate in Human Nutrition and Dietetics</option>
                   <option>Certificate in Social Work and Community Development</option>
                   <option>Certificate in Healthcare Support</option>
                   <option>Caregiving Level 4</option>
@@ -153,7 +151,7 @@ export default function ApplyPage() {
 
           <div className="field-group">
             <div className="num">03</div>
-            <h2>Intake / Semester Details</h2>
+            <h2>Semester Deferring Details</h2>
             <div className="row3">
               <div className="field">
                 <label>Original intake <span className="req">*</span></label>
