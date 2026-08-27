@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { sql } from "../../../../lib/db";
+import { markDeferredApprovedInSheet } from "../../../../lib/googleSheets";
 import { isValidSessionCookie, SESSION_COOKIE } from "../../../../lib/auth";
 
 const ALLOWED_STATUSES = ["pending", "approved", "denied"];
@@ -46,6 +47,15 @@ export async function PATCH(request, context) {
     `;
     if (rows.length === 0) {
       return NextResponse.json({ error: "Request not found." }, { status: 404 });
+    }
+        if (status === "approved") {
+      try {
+        await markDeferredApprovedInSheet(rows[0].admission_number);
+      } catch (sheetErr) {
+        // Don't fail the whole request if the Sheets write fails —
+        // the database update already succeeded, so log it and move on.
+        console.error("Google Sheets update failed:", sheetErr);
+      }
     }
     return NextResponse.json({ request: rows[0] });
   } catch (err) {
