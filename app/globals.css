@@ -97,3 +97,21 @@ button.approve:disabled,button.deny:disabled,button.reset:disabled{opacity:0.4;c
 .logout-btn{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,0.4);color:#fff;padding:6px 12px;border-radius:20px;cursor:pointer;}
 .tab-btn{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;background:transparent;border:none;padding:12px 4px;cursor:pointer;opacity:0.55;border-bottom:3px solid transparent;text-decoration:none;color:var(--ink);}
 .tab-btn.active{opacity:1;color:var(--navy);border-bottom-color:var(--gold);font-weight:600;}
+
+.deadline-banner{
+  background:var(--navy);color:#fff;border-radius:6px;padding:14px 20px;margin-bottom:18px;
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+.deadline-count{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:var(--gold-light);letter-spacing:0.03em;white-space:nowrap;}
+.deadline-text{font-size:13px;opacity:0.85;}
+.closed-notice{
+  background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:6px;
+  padding:36px 28px;text-align:center;
+}
+.closed-notice h3{font-family:'Fraunces',serif;color:var(--stamp-red);margin:0 0 10px;font-size:22px;}
+.closed-notice p{opacity:0.75;font-size:14px;line-height:1.6;max-width:520px;margin:0 auto;}
+.readonly-field{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:9px 10px;font-size:15px;opacity:0.75;}
+.disclaimer{
+  background:#FBF3E3;border:1px solid var(--gold);border-radius:5px;padding:12px 14px;
+  font-size:13px;line-height:1.55;color:var(--ink);margin-top:14px;
+}
