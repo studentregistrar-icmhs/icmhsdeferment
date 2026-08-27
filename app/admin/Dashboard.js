@@ -30,22 +30,32 @@ export default function Dashboard() {
 
   const filtered = filter === "all" ? requests : requests.filter((r) => r.status === filter);
 
+  function exportPdf() {
+    const url = filter === "all" ? "/api/requests/export" : `/api/requests/export?status=${filter}`;
+    window.open(url, "_blank");
+  }
+
   if (loading) return <div className="loading">Loading requests…</div>;
   if (loadError) return <div className="empty">{loadError}</div>;
 
   return (
     <div>
-      <div className="filters">
-        {["all", "pending", "approved", "denied"].map((f) => (
-          <button
-            key={f}
-            className={"chip" + (filter === f ? " active" : "")}
-            onClick={() => setFilter(f)}
-            type="button"
-          >
-            {f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
-          </button>
-        ))}
+      <div className="filters-row">
+        <div className="filters">
+          {["all", "pending", "approved", "denied"].map((f) => (
+            <button
+              key={f}
+              className={"chip" + (filter === f ? " active" : "")}
+              onClick={() => setFilter(f)}
+              type="button"
+            >
+              {f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
+          ))}
+        </div>
+        <button className="export-btn" type="button" onClick={exportPdf}>
+          Export {filter === "all" ? "All" : filter.charAt(0).toUpperCase() + filter.slice(1)} (PDF)
+        </button>
       </div>
 
       {filtered.length === 0 ? (
@@ -130,6 +140,7 @@ function Entry({ record, open, onToggle, onUpdated }) {
               <button className="approve" disabled={saving} onClick={() => setStatus("approved")}>Approve</button>
               <button className="deny" disabled={saving} onClick={() => setStatus("denied")}>Deny</button>
               <button className="reset" disabled={saving} onClick={() => setStatus("pending")}>Reset to Pending</button>
+              <button className="reset" type="button" onClick={() => window.open(`/api/requests/${record.id}/export`, "_blank")}>Download PDF</button>
               {err && <span className="err">{err}</span>}
             </div>
           </div>
