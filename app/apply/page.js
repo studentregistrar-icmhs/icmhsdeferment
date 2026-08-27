@@ -1,34 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  SEMESTERS,
+  getAllowedYears,
+  getAllowedSemesters,
+  getResumptionDate,
+  getSubmissionDeadline,
+  isCurrentSemesterDeadlinePassed,
+  formatDeadline
+} from "../../lib/deferment";
+import DeadlineBanner from "./DeadlineBanner";
 
 const initialState = {
   fullName: "",
-  studentId: "",
+  admissionNumber: "",
   email: "",
   phone: "",
   program: "",
   campus: "",
-  originalIntake: "",
-  originalYear: "",
-  deferredIntake: "",
-  deferredYear: "",
+  typeOfDeferment: "",
+  semesterDeferring: "",
+  deferYear: "",
   reasonCategory: "",
   reasonDetails: "",
-  supportingNotes: "",
-  signedName: "",
   declare: false
 };
 
+function sanitizePhone(value) {
+  // Keep digits, and a leading "+" only.
+  let v = value.replace(/[^\d+]/g, "");
+  const hasLeadingPlus = v.startsWith("+");
+  v = v.replace(/\+/g, "");
+  if (hasLeadingPlus) v = "+" + v;
+  return v;
+}
+
 export default function ApplyPage() {
+  const [now] = useState(() => new Date());
   const [form, setForm] = useState(initialState);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [confirmedId, setConfirmedId] = useState(null);
 
+  const deadline = useMemo(() => getSubmissionDeadline(now), [now]);
+  const currentDeadlinePassed = isCurrentSemesterDeadlinePassed(now);
+  const allowedYears = useMemo(() => getAllowedYears(now), [now]);
+  const allowedSemesters = useMemo(
+    () => (form.deferYear ? getAllowedSemesters(form.deferYear, now) : SEMESTERS),
+    [form.deferYear, now]
+  );
+
+  const applicationDateDisplay = now.toLocaleDateString("en-KE", {
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+  const applicationDateISO = now.toISOString().slice(0, 10);
+
+  const resumptionDate = useMemo(
+    () => getResumptionDate(form.semesterDeferring, form.deferYear),
+    [form.semesterDeferring, form.deferYear]
+  );
+
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
   }
+
+  // If the chosen year no longer allows the chosen semester (e.g. year changed), clear it.
+  useEffect(() => {
+    if (form.semesterDeferring && form.deferYear) {
+      const stillAllowed = allowedSemesters.some((s) => s.value === form.semesterDeferring);
+      if (!stillAllowed) update("semesterDeferring", "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.deferYear]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -38,7 +84,11 @@ export default function ApplyPage() {
       const res = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
+        body: JSON.stringify({
+          ...form,
+          applicationDate: applicationDateISO,
+          resumptionDate
+        })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -59,7 +109,7 @@ export default function ApplyPage() {
         <div className="confirm">
           <div className="stamp">On<br />File</div>
           <h3>Request received</h3>
-          <p>Your deferment request has been received at the ICMHS Registrars Office</p>
+          <p>Your deferment request has been logged with the ICMHS Office of Admissions &amp; Records.</p>
           <p className="id">Reference number: {confirmedId}</p>
           <div style={{ marginTop: 18 }}>
             <button
@@ -81,6 +131,7 @@ export default function ApplyPage() {
   return (
     <div className="wrap">
       <Letterhead />
+      {!currentDeadlinePassed && <DeadlineBanner deadline={deadline} />}
       <div className="doc">
         <form onSubmit={handleSubmit}>
           <div className="field-group">
@@ -93,7 +144,13 @@ export default function ApplyPage() {
               </div>
               <div className="field">
                 <label>Admission Number <span className="req">*</span></label>
-                <input type="text" placeholder="DPTT/S-0000/IC/26" required value={form.studentId} onChange={(e) => update("studentId", e.target.value)} />
+                <input
+                  type="text"
+                  required
+                  placeholder="DPTT/S-0000/IC/26"
+                  value={form.admissionNumber}
+                  onChange={(e) => update("admissionNumber", e.target.value)}
+                />
               </div>
             </div>
             <div className="row">
@@ -103,8 +160,19 @@ export default function ApplyPage() {
               </div>
               <div className="field">
                 <label>Phone number <span className="req">*</span></label>
-                <input type="tel" required placeholder="07XX XXX XXX" value={form.phone} onChange={(e) => update("phone", e.target.value)} />
+                <input
+                  type="tel"
+                  required
+                  inputMode="tel"
+                  placeholder="07XXXXXXXX"
+                  value={form.phone}
+                  onChange={(e) => update("phone", sanitizePhone(e.target.value))}
+                />
               </div>
+            </div>
+            <div className="field">
+              <label>Date of Application</label>
+              <div className="readonly-field">{applicationDateDisplay}</div>
             </div>
           </div>
 
@@ -120,19 +188,21 @@ export default function ApplyPage() {
                   <option>Diploma in Kenya Registered Community Health Nursing</option>
                   <option>Diploma in Biomedical Engineering Technology</option>
                   <option>Diploma in Perioperative Theatre Technology</option>
+                  <option>Diploma in Medical Laboratory Sciences</option>
                   <option>Diploma in Human Nutrition and Dietetics</option>
+                  <option>Diploma in Physiotherapy</option>
                   <option>Diploma in Health Records and Information Technology</option>
                   <option>Diploma in Community Health</option>
                   <option>Diploma in Counseling Psychology</option>
                   <option>Diploma in Social Work and Community Development</option>
+                  <option>Diploma in Mortuary Science</option>
                   <option>Diploma in Information Technology</option>
                 </optgroup>
                 <optgroup label="Certificate Programs">
                   <option>Certificate in Community Health</option>
-                  <option>Certificate in Perioperative Theatre Technology</option>
-                  <option>Certificate in Health Records and Information Technology</option>
+                  <option>Certificate in Counselling Psychology</option>
+                  <option>Certificate in Food Technology</option>
                   <option>Certificate in Science Laboratory Technology</option>
-                  <option>Certificate in Human Nutrition and Dietetics</option>
                   <option>Certificate in Social Work and Community Development</option>
                   <option>Certificate in Healthcare Support</option>
                   <option>Caregiving Level 4</option>
@@ -151,38 +221,53 @@ export default function ApplyPage() {
 
           <div className="field-group">
             <div className="num">03</div>
-            <h2>Semester Deferring Details</h2>
-            <div className="row3">
+            <h2>Deferment Details</h2>
+            <div className="row">
               <div className="field">
-                <label>Original intake <span className="req">*</span></label>
-                <select required value={form.originalIntake} onChange={(e) => update("originalIntake", e.target.value)}>
+                <label>Type of Deferment <span className="req">*</span></label>
+                <select required value={form.typeOfDeferment} onChange={(e) => update("typeOfDeferment", e.target.value)}>
                   <option value="">Select…</option>
-                  <option>January Intake</option>
-                  <option>May Intake</option>
-                  <option>September Intake</option>
+                  <option>Semester Deferment</option>
+                  <option>Attachment Deferment</option>
                 </select>
               </div>
               <div className="field">
-                <label>Original year <span className="req">*</span></label>
-                <input type="number" required min="2024" max="2035" placeholder="2026" value={form.originalYear} onChange={(e) => update("originalYear", e.target.value)} />
+                <label>Year <span className="req">*</span></label>
+                <select required value={form.deferYear} onChange={(e) => update("deferYear", e.target.value)}>
+                  <option value="">Select…</option>
+                  {allowedYears.map((y) => (
+                    <option key={y} value={y}>{y}</option>
+                  ))}
+                </select>
               </div>
             </div>
-            <div className="row3">
+            <div className="row">
               <div className="field">
-                <label>Requested deferred intake <span className="req">*</span></label>
-                <select required value={form.deferredIntake} onChange={(e) => update("deferredIntake", e.target.value)}>
-                  <option value="">Select…</option>
-                  <option>January Intake</option>
-                  <option>May Intake</option>
-                  <option>September Intake</option>
+                <label>Semester Deferring <span className="req">*</span></label>
+                <select
+                  required
+                  value={form.semesterDeferring}
+                  disabled={!form.deferYear}
+                  onChange={(e) => update("semesterDeferring", e.target.value)}
+                >
+                  <option value="">{form.deferYear ? "Select…" : "Select a year first"}</option>
+                  {allowedSemesters.map((s) => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
+                  ))}
                 </select>
               </div>
               <div className="field">
-                <label>Deferred year <span className="req">*</span></label>
-                <input type="number" required min="2024" max="2035" placeholder="2027" value={form.deferredYear} onChange={(e) => update("deferredYear", e.target.value)} />
+                <label>Resumption Date</label>
+                <div className="readonly-field">
+                  {resumptionDate || "Select semester and year first"}
+                </div>
               </div>
             </div>
-            <div className="hint">ICMHS admits three times a year — January, May, and September intakes.</div>
+            <div className="disclaimer">
+              ICMHS deferment policy permits deferring a maximum of one semester (approximately
+              three months) at a time. Your resumption date above is calculated automatically
+              according to this policy and cannot be extended.
+            </div>
           </div>
 
           <div className="field-group">
@@ -209,25 +294,12 @@ export default function ApplyPage() {
 
           <div className="field-group">
             <div className="num">05</div>
-            <h2>Supporting Documentation</h2>
-            <div className="field">
-              <label>Documents you will provide to the registrar</label>
-              <textarea placeholder="e.g. Doctor's letter, employer confirmation, KCSE result slip. Files are submitted separately via email or in person at the campus admissions office." value={form.supportingNotes} onChange={(e) => update("supportingNotes", e.target.value)} />
-            </div>
-          </div>
-
-          <div className="field-group">
-            <div className="num">06</div>
             <h2>Declaration</h2>
             <div className="declaration">
               <input type="checkbox" required checked={form.declare} onChange={(e) => update("declare", e.target.checked)} id="declare" />
               <label htmlFor="declare" style={{ margin: 0 }}>
                 I certify that the information provided in this request is accurate and complete to the best of my knowledge, and I understand that a deferment does not guarantee admission under future terms. I understand ICMHS programs are regulated by TVETA and relevant professional bodies.
               </label>
-            </div>
-            <div className="field" style={{ marginTop: 14 }}>
-              <label>Typed signature (full name) <span className="req">*</span></label>
-              <input type="text" required value={form.signedName} onChange={(e) => update("signedName", e.target.value)} />
             </div>
             <div className="badge-row">
               <span className="accred-badge">TVETA Accredited</span>

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { sql } from "../../../lib/db";
+import { isSemesterYearAllowed } from "../../../lib/deferment";
 import crypto from "crypto";
 
 function genId() {
@@ -13,18 +14,21 @@ function genId() {
 
 const REQUIRED = [
   "fullName",
+  "admissionNumber",
   "email",
   "phone",
+  "applicationDate",
   "program",
   "campus",
-  "originalIntake",
-  "originalYear",
-  "deferredIntake",
-  "deferredYear",
+  "typeOfDeferment",
+  "semesterDeferring",
+  "deferYear",
+  "resumptionDate",
   "reasonCategory",
-  "reasonDetails",
-  "signedName"
+  "reasonDetails"
 ];
+
+const PHONE_PATTERN = /^\+?\d{7,15}$/;
 
 export async function POST(request) {
   let body;
@@ -34,10 +38,23 @@ export async function POST(request) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
+  const now = new Date();
+
   for (const field of REQUIRED) {
     if (!body[field] || String(body[field]).trim() === "") {
       return NextResponse.json({ error: `Missing field: ${field}` }, { status: 400 });
     }
+  }
+
+  if (!PHONE_PATTERN.test(body.phone)) {
+    return NextResponse.json({ error: "Phone number must contain digits only." }, { status: 400 });
+  }
+
+  if (!isSemesterYearAllowed(body.semesterDeferring, body.deferYear, now)) {
+    return NextResponse.json(
+      { error: "That semester has already passed its deferment deadline, or is not a valid target. Please choose a current or future semester." },
+      { status: 400 }
+    );
   }
 
   const id = genId();
@@ -45,14 +62,14 @@ export async function POST(request) {
   try {
     await sql`
       INSERT INTO deferment_requests (
-        id, full_name, student_id, email, phone, program, campus,
-        original_intake, original_year, deferred_intake, deferred_year,
-        reason_category, reason_details, supporting_notes, signed_name, status
+        id, full_name, admission_number, email, phone, application_date, program, campus,
+        type_of_deferment, semester_deferring, defer_year, resumption_date,
+        reason_category, reason_details, status
       ) VALUES (
-        ${id}, ${body.fullName}, ${body.studentId || null}, ${body.email}, ${body.phone},
-        ${body.program}, ${body.campus}, ${body.originalIntake}, ${body.originalYear},
-        ${body.deferredIntake}, ${body.deferredYear}, ${body.reasonCategory},
-        ${body.reasonDetails}, ${body.supportingNotes || null}, ${body.signedName}, 'pending'
+        ${id}, ${body.fullName}, ${body.admissionNumber}, ${body.email}, ${body.phone},
+        ${body.applicationDate}, ${body.program}, ${body.campus}, ${body.typeOfDeferment},
+        ${body.semesterDeferring}, ${body.deferYear}, ${body.resumptionDate},
+        ${body.reasonCategory}, ${body.reasonDetails}, 'pending'
       )
     `;
     return NextResponse.json({ id }, { status: 201 });

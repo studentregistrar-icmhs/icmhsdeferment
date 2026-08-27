@@ -30,22 +30,32 @@ export default function Dashboard() {
 
   const filtered = filter === "all" ? requests : requests.filter((r) => r.status === filter);
 
+  function exportPdf() {
+    const url = filter === "all" ? "/api/requests/export" : `/api/requests/export?status=${filter}`;
+    window.open(url, "_blank");
+  }
+
   if (loading) return <div className="loading">Loading requests…</div>;
   if (loadError) return <div className="empty">{loadError}</div>;
 
   return (
     <div>
-      <div className="filters">
-        {["all", "pending", "approved", "denied"].map((f) => (
-          <button
-            key={f}
-            className={"chip" + (filter === f ? " active" : "")}
-            onClick={() => setFilter(f)}
-            type="button"
-          >
-            {f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
-          </button>
-        ))}
+      <div className="filters-row">
+        <div className="filters">
+          {["all", "pending", "approved", "denied"].map((f) => (
+            <button
+              key={f}
+              className={"chip" + (filter === f ? " active" : "")}
+              onClick={() => setFilter(f)}
+              type="button"
+            >
+              {f === "all" ? "All" : f.charAt(0).toUpperCase() + f.slice(1)}
+            </button>
+          ))}
+        </div>
+        <button className="export-btn" type="button" onClick={exportPdf}>
+          Export {filter === "all" ? "All" : filter.charAt(0).toUpperCase() + filter.slice(1)} (Excel)
+        </button>
       </div>
 
       {filtered.length === 0 ? (
@@ -99,7 +109,7 @@ function Entry({ record, open, onToggle, onUpdated }) {
         <div>
           <div className="name">{record.full_name || "Unnamed applicant"}</div>
           <div className="meta">
-            {record.id} · {record.program} · {record.campus} · filed{" "}
+            {record.id} · {record.admission_number || "no admission no."} · {record.program} · filed{" "}
             {new Date(record.submitted_at).toLocaleDateString()}
           </div>
         </div>
@@ -111,36 +121,26 @@ function Entry({ record, open, onToggle, onUpdated }) {
       {open && (
         <div className="entry-body">
           <div className="detail-grid">
-            <Detail k="Student ID" v={record.student_id} />
+            <Detail k="Admission Number" v={record.admission_number} />
             <Detail k="Email" v={record.email} />
             <Detail k="Phone" v={record.phone} />
             <Detail k="Campus" v={record.campus} />
+            <Detail k="Application Date" v={record.application_date} />
+            <Detail k="Type of Deferment" v={record.type_of_deferment} />
+            <Detail k="Semester Deferring" v={`${record.semester_deferring || ""} ${record.defer_year || ""}`.trim()} />
+            <Detail k="Resumption Date" v={record.resumption_date} />
             <Detail k="Reason category" v={record.reason_category} />
-            <Detail k="Original intake" v={`${record.original_intake} ${record.original_year}`} />
-            <Detail k="Requested intake" v={`${record.deferred_intake} ${record.deferred_year}`} />
             <Detail full k="Explanation" v={record.reason_details} />
-            <Detail full k="Supporting documentation notes" v={record.supporting_notes} />
-            <Detail full k="Signed by" v={record.signed_name} />
           </div>
 
           <div className="review-controls">
             <label>Reviewer notes</label>
             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Internal notes for this request" />
-            <div className="action-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <div className="action-row">
               <button className="approve" disabled={saving} onClick={() => setStatus("approved")}>Approve</button>
               <button className="deny" disabled={saving} onClick={() => setStatus("denied")}>Deny</button>
               <button className="reset" disabled={saving} onClick={() => setStatus("pending")}>Reset to Pending</button>
-              
-              {/* PDF EXPORT BUTTON INTEGRATION */}
-              <a
-                href={`/api/applications/${record.id}/export`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ textDecoration: 'none' }}
-              >
-                <button type="button" style={{ cursor: 'pointer' }}>Export PDF</button>
-              </a>
-
+              <button className="reset" type="button" onClick={() => window.open(`/api/requests/${record.id}/export`, "_blank")}>Download PDF</button>
               {err && <span className="err">{err}</span>}
             </div>
           </div>
