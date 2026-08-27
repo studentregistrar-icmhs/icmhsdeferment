@@ -54,7 +54,7 @@ export default function Dashboard() {
           ))}
         </div>
         <button className="export-btn" type="button" onClick={exportPdf}>
-          Export {filter === "all" ? "All" : filter.charAt(0).toUpperCase() + filter.slice(1)} (PDF)
+          Export {filter === "all" ? "All" : filter.charAt(0).toUpperCase() + filter.slice(1)} (Excel)
         </button>
       </div>
 

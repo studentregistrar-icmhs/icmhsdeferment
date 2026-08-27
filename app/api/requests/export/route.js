@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { sql } from "../../../../lib/db";
 import { isValidSessionCookie, SESSION_COOKIE } from "../../../../lib/auth";
-import { generateBulkRequestsPdf } from "../../../../lib/pdf";
+import { generateRequestsExcel } from "../../../../lib/excel";
 
 const VALID_STATUSES = ["pending", "approved", "denied"];
 
@@ -31,17 +31,17 @@ export async function GET(request) {
       : await sql`SELECT * FROM deferment_requests ORDER BY submitted_at DESC`;
 
     const label = status ? status.charAt(0).toUpperCase() + status.slice(1) : "All";
-    const bytes = await generateBulkRequestsPdf(rows, label);
+    const buffer = await generateRequestsExcel(rows, label);
 
-    return new NextResponse(Buffer.from(bytes), {
+    return new NextResponse(buffer, {
       status: 200,
       headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="icmhs-deferment-requests-${label.toLowerCase()}.pdf"`
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Disposition": `attachment; filename="icmhs-deferment-requests-${label.toLowerCase()}.xlsx"`
       }
     });
   } catch (err) {
     console.error("Bulk export failed:", err);
-    return NextResponse.json({ error: "Could not generate PDF." }, { status: 500 });
+    return NextResponse.json({ error: "Could not generate spreadsheet." }, { status: 500 });
   }
 }
