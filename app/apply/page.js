@@ -193,10 +193,6 @@ function unlockDetails() {
             <h2>Applicant Information</h2>
             <div className="row">
               <div className="field">
-                <label>Full Name <span className="req">*</span></label>
-                <input type="text" required value={form.fullName} disabled onChange={(e) => update("fullName", e.target.value)} />
-              </div>
-              <div className="field">
               <label>Admission Number <span className="req">*</span></label>
               <input
                 type="text"
@@ -234,6 +230,10 @@ function unlockDetails() {
               )}
             </div>
             </div>
+            <div className="field">
+                <label>Full Name <span className="req">*</span></label>
+                <input type="text" required value={form.fullName} disabled onChange={(e) => update("fullName", e.target.value)} />
+              </div>
             <div className="row">
               <div className="field">
                 <label>Email address <span className="req">*</span></label>
