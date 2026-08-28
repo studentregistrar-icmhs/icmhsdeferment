@@ -229,11 +229,11 @@ function unlockDetails() {
                 </button>
               )}
             </div>
-            </div>
             <div className="field">
                 <label>Full Name <span className="req">*</span></label>
                 <input type="text" required value={form.fullName} disabled onChange={(e) => update("fullName", e.target.value)} />
-              </div>
+            </div>
+            </div>
             <div className="row">
               <div className="field">
                 <label>Email address <span className="req">*</span></label>
