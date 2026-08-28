@@ -42,6 +42,8 @@ export default function ApplyPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [confirmedId, setConfirmedId] = useState(null);
+  const [lookupStatus, setLookupStatus] = useState("idle"); // idle | loading | found | not_found | error
+  const [locked, setLocked] = useState(false);
 
   const deadline = useMemo(() => getSubmissionDeadline(now), [now]);
   const currentDeadlinePassed = isCurrentSemesterDeadlinePassed(now);
@@ -66,6 +68,34 @@ export default function ApplyPage() {
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
   }
+  async function handleLookup() {
+  if (!form.admissionNumber.trim()) return;
+  setLookupStatus("loading");
+  try {
+    const res = await fetch(`/api/lookup-student?admissionNumber=${encodeURIComponent(form.admissionNumber.trim())}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Lookup failed.");
+    if (!data.found) {
+      setLookupStatus("not_found");
+      return;
+    }
+    setForm((f) => ({
+      ...f,
+      fullName: data.name || f.fullName,
+      campus: data.campus || f.campus,
+      program: data.programme || f.program
+    }));
+    setLocked(true);
+    setLookupStatus("found");
+  } catch (err) {
+    setLookupStatus("error");
+  }
+}
+
+function unlockDetails() {
+  setLocked(false);
+  setLookupStatus("idle");
+}
 
   // If the chosen year no longer allows the chosen semester (e.g. year changed), clear it.
   useEffect(() => {
@@ -140,18 +170,44 @@ export default function ApplyPage() {
             <div className="row">
               <div className="field">
                 <label>Full Name <span className="req">*</span></label>
-                <input type="text" required value={form.fullName} onChange={(e) => update("fullName", e.target.value)} />
-              </div>
+                <input type="text" required value={form.fullName} disabled={locked} onChange={(e) => update("fullName", e.target.value)} />              </div>
               <div className="field">
-                <label>Admission Number <span className="req">*</span></label>
-                <input
-                  type="text"
-                  required
-                  placeholder="DPTT/S-0000/IC/26"
-                  value={form.admissionNumber}
-                  onChange={(e) => update("admissionNumber", e.target.value)}
-                />
-              </div>
+              <label>Admission Number <span className="req">*</span></label>
+              <input
+                type="text"
+                required
+                placeholder="DPTT/S-0000/IC/26"
+                value={form.admissionNumber}
+                disabled={locked}
+                onChange={(e) => update("admissionNumber", e.target.value)}
+              />
+              {!locked && (
+                <button
+                  type="button"
+                  className="secondary"
+                  style={{ marginTop: 6 }}
+                  onClick={handleLookup}
+                  disabled={lookupStatus === "loading" || !form.admissionNumber.trim()}
+                >
+                  {lookupStatus === "loading" ? "Checking…" : "Verify admission number"}
+                </button>
+              )}
+              {lookupStatus === "not_found" && (
+                <div className="err" style={{ marginTop: 6 }}>
+                  Admission number not found. Please check it, or continue and fill your details manually.
+                </div>
+              )}
+              {lookupStatus === "error" && (
+                <div className="err" style={{ marginTop: 6 }}>
+                  Could not verify right now. You can continue filling the form manually.
+                </div>
+              )}
+              {locked && (
+                <button type="button" className="secondary" style={{ marginTop: 6 }} onClick={unlockDetails}>
+                  Not you? Change admission number
+                </button>
+              )}
+            </div>
             </div>
             <div className="row">
               <div className="field">
@@ -181,8 +237,7 @@ export default function ApplyPage() {
             <h2>Program &amp; Campus</h2>
             <div className="field">
               <label>Program applied to <span className="req">*</span></label>
-              <select required value={form.program} onChange={(e) => update("program", e.target.value)}>
-                <option value="">Select a program…</option>
+              <select required value={form.program} disabled={locked && !!form.program} onChange={(e) => update("program", e.target.value)}>                <option value="">Select a program…</option>
                 <optgroup label="Diploma Programs">
                   <option>Diploma in Clinical Medicine and Surgery</option>
                   <option>Diploma in Kenya Registered Community Health Nursing</option>
@@ -208,11 +263,15 @@ export default function ApplyPage() {
                   <option>Caregiving Level 4</option>
                 </optgroup>
               </select>
+              {locked && !form.program && (
+                <div className="disclaimer" style={{ marginTop: 4 }}>
+                  We found your record but couldn't confidently match your programme name — please select it from the list.
+                </div>
+              )}
             </div>
             <div className="field">
               <label>Campus <span className="req">*</span></label>
-              <select required value={form.campus} onChange={(e) => update("campus", e.target.value)}>
-                <option value="">Select a campus…</option>
+              <select required value={form.campus} disabled={locked} onChange={(e) => update("campus", e.target.value)}>                <option value="">Select a campus…</option>
                 <option>Thika Main Campus</option>
                 <option>Nakuru Campus</option>
               </select>
