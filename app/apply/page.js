@@ -6,7 +6,7 @@ import {
   getAllowedYears,
   getAllowedSemesters,
   getResumptionDate,
-  getSubmissionDeadline,
+  getCurrentSemesterValue,
   isCurrentSemesterDeadlinePassed,
   formatDeadline
 } from "../../lib/deferment";
@@ -45,12 +45,34 @@ export default function ApplyPage() {
   const [lookupStatus, setLookupStatus] = useState("idle"); // idle | loading | found | not_found | error
   const [locked, setLocked] = useState(false);
 
-  const deadline = useMemo(() => getSubmissionDeadline(now), [now]);
-  const currentDeadlinePassed = isCurrentSemesterDeadlinePassed(now);
+  // Registrar-set deadlines, fetched once on mount. Empty array until loaded;
+  // no deadline configured for an intake means it stays open (permissive).
+  const [deadlines, setDeadlines] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/deadlines")
+      .then((res) => res.json())
+      .then((data) => setDeadlines(data.deadlines || []))
+      .catch(() => setDeadlines([]));
+  }, []);
+
+  const isMaternity = form.typeOfDeferment === "Maternity Leave";
+
+  const currentSemesterValue = useMemo(() => getCurrentSemesterValue(now), [now]);
+  const currentYear = now.getFullYear();
+  const currentDeadlineRow = useMemo(
+    () => deadlines.find((d) => d.semester === currentSemesterValue && Number(d.year) === currentYear),
+    [deadlines, currentSemesterValue, currentYear]
+  );
+  const currentDeadlinePassed = isCurrentSemesterDeadlinePassed(currentDeadlineRow, now);
+
   const allowedYears = useMemo(() => getAllowedYears(now), [now]);
   const allowedSemesters = useMemo(
-    () => (form.deferYear ? getAllowedSemesters(form.deferYear, now) : SEMESTERS),
-    [form.deferYear, now]
+    () =>
+      form.deferYear
+        ? getAllowedSemesters(form.deferYear, now, currentDeadlinePassed, isMaternity)
+        : SEMESTERS,
+    [form.deferYear, now, currentDeadlinePassed, isMaternity]
   );
 
   const applicationDateDisplay = now.toLocaleDateString("en-KE", {
@@ -97,14 +119,14 @@ function unlockDetails() {
   setLookupStatus("idle");
 }
 
-  // If the chosen year no longer allows the chosen semester (e.g. year changed), clear it.
+  // If the chosen year/type no longer allows the chosen semester, clear it.
   useEffect(() => {
     if (form.semesterDeferring && form.deferYear) {
       const stillAllowed = allowedSemesters.some((s) => s.value === form.semesterDeferring);
       if (!stillAllowed) update("semesterDeferring", "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.deferYear]);
+  }, [form.deferYear, form.typeOfDeferment]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -161,7 +183,9 @@ function unlockDetails() {
   return (
     <div className="wrap">
       <Letterhead />
-      {!currentDeadlinePassed && <DeadlineBanner deadline={deadline} />}
+      {!isMaternity && currentDeadlineRow && !currentDeadlinePassed && (
+        <DeadlineBanner deadline={new Date(currentDeadlineRow.deadline)} />
+      )}
       <div className="doc">
         <form onSubmit={handleSubmit}>
           <div className="field-group">
@@ -247,11 +271,7 @@ function unlockDetails() {
             </div>
             <div className="field">
               <label>Campus <span className="req">*</span></label>
-              <select required value={form.campus} disabled onChange={(e) => update("campus", e.target.value)}>                
-                <option value="">Select a campus…</option>
-                  <option>Thika Main Campus</option>
-                  <option>Nakuru Campus</option>
-              </select>
+              <div className="readonly-field">{form.campus || "Not yet verified"}</div>
             </div>
           </div>
 
@@ -267,6 +287,11 @@ function unlockDetails() {
                   <option>Attachment Deferment</option>
                   <option>Maternity Leave</option>
                 </select>
+                {isMaternity && (
+                  <div className="hint" style={{ marginTop: 4 }}>
+                    Maternity Deferment has no submission deadline — you may apply at any time during the semester.
+                  </div>
+                )}
               </div>
               <div className="field">
                 <label>Year <span className="req">*</span></label>

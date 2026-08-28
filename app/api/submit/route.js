@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { sql } from "../../../lib/db";
-import { isSemesterYearAllowed } from "../../../lib/deferment";
+import {
+  SEMESTERS,
+  getCurrentSemesterValue,
+  isCurrentSemesterDeadlinePassed,
+  isSemesterYearAllowed
+} from "../../../lib/deferment";
 import crypto from "crypto";
 
 function genId() {
@@ -50,12 +55,34 @@ export async function POST(request) {
     return NextResponse.json({ error: "Phone number must contain digits only." }, { status: 400 });
   }
 
-  if (!isSemesterYearAllowed(body.semesterDeferring, body.deferYear, now)) {
+  // Fetch the registrar-set deadline for the CURRENT ongoing semester (if any),
+  // then apply the same allowed-semester rule the client uses — recomputed
+  // here independently so the client can never bypass this by editing the page.
+  const isMaternity = body.typeOfDeferment === "Maternity Leave";
+  let currentDeadlineRow = null;
+  try {
+    const currentSemesterValue = getCurrentSemesterValue(now);
+    const currentYear = String(now.getFullYear());
+    const rows = await sql`
+      SELECT deadline FROM deferment_deadlines
+      WHERE semester = ${currentSemesterValue} AND year = ${currentYear}
+      LIMIT 1
+    `;
+    if (rows.length > 0) currentDeadlineRow = rows[0];
+  } catch (err) {
+    console.error("Deadline lookup failed:", err);
+    return NextResponse.json({ error: "Could not verify the deferment window. Please try again." }, { status: 500 });
+  }
+
+  const currentDeadlinePassed = isCurrentSemesterDeadlinePassed(currentDeadlineRow, now);
+
+  if (!isSemesterYearAllowed(body.semesterDeferring, body.deferYear, now, currentDeadlinePassed, isMaternity)) {
     return NextResponse.json(
       { error: "That semester has already passed its deferment deadline, or is not a valid target. Please choose a current or future semester." },
       { status: 400 }
     );
   }
+
   // Block a second application for the same admission number + semester + year,
   // regardless of that earlier request's status (pending/approved/denied all count).
   try {
@@ -76,6 +103,7 @@ export async function POST(request) {
     console.error("Duplicate check failed:", err);
     return NextResponse.json({ error: "Could not verify your request. Please try again." }, { status: 500 });
   }
+
   const id = genId();
 
   try {

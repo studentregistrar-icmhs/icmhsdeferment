@@ -1,12 +1,13 @@
+import { Suspense } from "react";
 import { cookies } from "next/headers";
-import { isValidSessionCookie, SESSION_COOKIE } from "../../lib/auth";
-import LoginForm from "./LoginForm";
-import Dashboard from "./Dashboard";
-import LogoutButtonClient from "./LogoutButtonClient";
+import { isValidSessionCookie, SESSION_COOKIE } from "../../../lib/auth";
+import LoginForm from "../LoginForm";
+import LogoutButtonClient from "../LogoutButtonClient";
+import DeadlineSettings from "./DeadlineSettings";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminPage() {
+export default async function SettingsPage() {
   const cookieStore = await cookies();
   const session = cookieStore.get(SESSION_COOKIE)?.value;
 
@@ -30,20 +31,20 @@ export default async function AdminPage() {
           />
           <div>
             <div className="eyebrow">Office of the Registrar of Students</div>
-            <h1>Registrar Review</h1>
+            <h1>Deferment Deadline Settings</h1>
             <div className="sub">Imperial College of Medical and Health Sciences</div>
           </div>
         </div>
-                {authed && <LogoutButtonClient />}
-                  </div>
+        {authed && <LogoutButtonClient />}
+      </div>
 
-                  {authed && (
-                    <div className="settings-nav">
-                      <a href="/admin/settings" className="tab-btn">Deadline Settings &rarr;</a>
-                    </div>
-                  )}
+      {authed && (
+        <div className="settings-nav">
+          <a href="/admin" className="tab-btn">&larr; Back to Dashboard</a>
+        </div>
+      )}
 
-                  {authed ? <Dashboard /> : <Suspense fallback={null}><LoginForm /></Suspense>}
+      {authed ? <DeadlineSettings /> : <Suspense fallback={null}><LoginForm /></Suspense>}
     </div>
   );
 }
