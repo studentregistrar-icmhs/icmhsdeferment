@@ -170,7 +170,9 @@ function unlockDetails() {
             <div className="row">
               <div className="field">
                 <label>Full Name <span className="req">*</span></label>
-                <input type="text" required value={form.fullName} disabled={locked} onChange={(e) => update("fullName", e.target.value)} />              <div className="field">
+                <input type="text" required value={form.fullName} disabled={locked} onChange={(e) => update("fullName", e.target.value)} />
+              </div>
+              <div className="field">
               <label>Admission Number <span className="req">*</span></label>
               <input
                 type="text"
@@ -293,9 +295,10 @@ function unlockDetails() {
             </div>
             <div className="field">
               <label>Campus <span className="req">*</span></label>
-              <select required value={form.campus} disabled={locked} onChange={(e) => update("campus", e.target.value)}>                <option value="">Select a campus…</option>
-                <option>Thika Main Campus</option>
-                <option>Nakuru Campus</option>
+              <select required value={form.campus} disabled={locked} onChange={(e) => update("campus", e.target.value)}>                
+                <option value="">Select a campus…</option>
+                  <option>Thika Main Campus</option>
+                  <option>Nakuru Campus</option>
               </select>
             </div>
           </div>
