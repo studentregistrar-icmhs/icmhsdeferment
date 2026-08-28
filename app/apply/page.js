@@ -313,6 +313,7 @@ function unlockDetails() {
                   <option value="">Select…</option>
                   <option>Semester Deferment</option>
                   <option>Attachment Deferment</option>
+                  <option>Maternity Leave</option>
                 </select>
               </div>
               <div className="field">
