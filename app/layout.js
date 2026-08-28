@@ -2,7 +2,7 @@ import "./globals.css";
 
 export const metadata = {
   title: "ICMHS Enrollment Deferment Request",
-  description: "Imperial College of Medical and Health Sciences — Office of Admissions & Records"
+  description: "Imperial College of Medical and Health Sciences — Office of Registrar of Students"
 };
 
 export default function RootLayout({ children }) {
