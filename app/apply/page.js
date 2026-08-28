@@ -139,7 +139,7 @@ function unlockDetails() {
         <div className="confirm">
           <div className="stamp">On<br />File</div>
           <h3>Request received</h3>
-          <p>Your deferment request has been logged with the ICMHS Office of Admissions &amp; Records.</p>
+          <p>Your deferment request has been logged with the ICMHS Office of the Registrar of Students.</p>
           <p className="id">Reference number: {confirmedId}</p>
           <div style={{ marginTop: 18 }}>
             <button
@@ -195,7 +195,7 @@ function unlockDetails() {
               )}
               {lookupStatus === "not_found" && (
                 <div className="err" style={{ marginTop: 6 }}>
-                  Admission number not found in our records. Please double-check it, or contact the Office of Admissions &amp; Records for assistance.
+                  Admission number not found in our records. Please double-check it, or contact the Office of the Registrar of Students for assistance.
                 </div>
               )}
               {lookupStatus === "error" && (
@@ -241,7 +241,7 @@ function unlockDetails() {
               <div className="readonly-field">{form.program || "Not yet verified"}</div>
               {locked && !form.program && (
                 <div className="disclaimer" style={{ marginTop: 4 }}>
-                  We found your record, but couldn't match your programme automatically. Please contact the Office of Admissions &amp; Records for assistance.
+                  We found your record, but couldn't match your programme automatically. Please contact the Office of the Registrar of Students for assistance.
                 </div>
               )}
             </div>
@@ -346,7 +346,7 @@ function unlockDetails() {
           </div>
 
           <div className="submit-row">
-            <div className="note">Submissions are reviewed by the ICMHS Office of Admissions &amp; Records.</div>
+            <div className="note">Submissions are reviewed by the ICMHS Office of the Registrar of Students.</div>
             <button className="primary" type="submit" disabled={submitting}>
               {submitting ? "Submitting…" : "Submit Request"}
             </button>
@@ -365,7 +365,7 @@ function Letterhead() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className="logo" src="https://images.icmhs.co.ke/admin/janus/files/icmhs_new_logo.webp" alt="ICMHS logo" onError={(e) => (e.currentTarget.style.display = "none")} />
         <div>
-          <div className="eyebrow">Office of Admissions &amp; Records</div>
+          <div className="eyebrow">Office of the Registrar of Students</div>
           <h1>Enrollment Deferment Request</h1>
           <div className="sub">Imperial College of Medical and Health Sciences</div>
         </div>

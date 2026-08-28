@@ -29,7 +29,7 @@ export default async function AdminPage() {
             alt="ICMHS logo"
           />
           <div>
-            <div className="eyebrow">Office of Admissions &amp; Records</div>
+            <div className="eyebrow">Office of the Registrar of Students</div>
             <h1>Registrar Review</h1>
             <div className="sub">Imperial College of Medical and Health Sciences</div>
           </div>
