@@ -236,7 +236,8 @@ function unlockDetails() {
             <h2>Program &amp; Campus</h2>
             <div className="field">
               <label>Program applied to <span className="req">*</span></label>
-              <select required value={form.program} disabled={locked && !!form.program} onChange={(e) => update("program", e.target.value)}>                <option value="">Select a program…</option>
+              <select required value={form.program} disabled={locked && !!form.program} onChange={(e) => update("program", e.target.value)}>
+                <option value="">Select a program…</option>
                 <optgroup label="Diploma Programs">
                   <option>Diploma in Clinical Medicine and Surgery</option>
                   <option>Diploma in Kenya Registered Community Health Nursing</option>
@@ -247,10 +248,16 @@ function unlockDetails() {
                   <option>Diploma in Physiotherapy</option>
                   <option>Diploma in Health Records and Information Technology</option>
                   <option>Diploma in Community Health</option>
-                  <option>Diploma in Counseling Psychology</option>
+                  <option>Diploma in Counselling Psychology</option>
                   <option>Diploma in Social Work and Community Development</option>
                   <option>Diploma in Mortuary Science</option>
                   <option>Diploma in Information Technology</option>
+                  <option>Diploma in Applied Biology</option>
+                  <option>Diploma in Environmental Science</option>
+                  <option>Diploma in Food Production (Culinary Arts)</option>
+                  <option>Diploma in Food Science and Processing Technology</option>
+                  <option>Diploma in Medical Engineering</option>
+                  <option>Diploma in Science Laboratory Technology</option>
                 </optgroup>
                 <optgroup label="Certificate Programs">
                   <option>Certificate in Community Health</option>
@@ -260,6 +267,22 @@ function unlockDetails() {
                   <option>Certificate in Social Work and Community Development</option>
                   <option>Certificate in Healthcare Support</option>
                   <option>Caregiving Level 4</option>
+                  <option>Certificate in Healthcare Support Assistant</option>
+                  <option>Certificate in Biomedical Engineering Technology</option>
+                  <option>Certificate in Food &amp; Beverage Production, Service and Sales</option>
+                  <option>Certificate in Food Science and Processing Technology</option>
+                  <option>Certificate in Human Nutrition and Dietetics</option>
+                  <option>Certificate in Health Records &amp; Information Technology</option>
+                  <option>Certificate in Information Technology</option>
+                  <option>Certificate in Perioperative Theatre Technology</option>
+                </optgroup>
+                <optgroup label="Other Programs">
+                  <option>Artisan in Health Support Service</option>
+                  <option>Computer Packages</option>
+                  <option>Phlebotomy</option>
+                  <option>Nursing Skills</option>
+                  <option>Peer Counselling</option>
+                  <option>Integrated Management of Malnutrition</option>
                 </optgroup>
               </select>
               {locked && !form.program && (
