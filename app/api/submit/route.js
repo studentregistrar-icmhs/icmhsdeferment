@@ -56,7 +56,26 @@ export async function POST(request) {
       { status: 400 }
     );
   }
-
+  // Block a second application for the same admission number + semester + year,
+  // regardless of that earlier request's status (pending/approved/denied all count).
+  try {
+    const existing = await sql`
+      SELECT id FROM deferment_requests
+      WHERE admission_number = ${body.admissionNumber}
+        AND semester_deferring = ${body.semesterDeferring}
+        AND defer_year = ${body.deferYear}
+      LIMIT 1
+    `;
+    if (existing.length > 0) {
+      return NextResponse.json(
+        { error: "You have already submitted a deferment request for this semester. Only one request per semester is allowed." },
+        { status: 409 }
+      );
+    }
+  } catch (err) {
+    console.error("Duplicate check failed:", err);
+    return NextResponse.json({ error: "Could not verify your request. Please try again." }, { status: 500 });
+  }
   const id = genId();
 
   try {
