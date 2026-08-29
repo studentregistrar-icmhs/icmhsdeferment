@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { isValidSessionCookie, SESSION_COOKIE } from "../../lib/auth";
 import LoginForm from "./LoginForm";
