@@ -10,7 +10,7 @@ import {
   isCurrentSemesterDeadlinePassed,
   formatDeadline
 } from "../../lib/deferment";
-import DeadlineBanner from "../../components/DeadlineBanner";
+import DeadlineBanner from "./DeadlineBanner";
 
 const initialState = {
   fullName: "",
