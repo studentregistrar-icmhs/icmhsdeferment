@@ -62,7 +62,7 @@ export async function POST(request) {
       ON CONFLICT (semester, year)
       DO UPDATE SET deadline = EXCLUDED.deadline, updated_at = now()
     `;
-        const res = NextResponse.json({ ok: true });
+            return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("Deadline save failed:", err);
     return NextResponse.json({ error: "Could not save deadline." }, { status: 500 });
