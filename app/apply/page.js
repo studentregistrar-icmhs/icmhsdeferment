@@ -10,7 +10,7 @@ import {
   isCurrentSemesterDeadlinePassed,
   formatDeadline
 } from "../../lib/deferment";
-import DeadlineBanner from "./DeadlineBanner";
+import DeadlineBanner from "../../components/DeadlineBanner";
 
 const initialState = {
   fullName: "",
@@ -342,7 +342,7 @@ function unlockDetails() {
                 <option>Financial hardship</option>
                 <option>Medical or health circumstances</option>
                 <option>Personal or family circumstances</option>
-                <option>Immigration or visa delay</option>
+                <option>Pending Supplementary</option>
                 <option>Employment or work obligation</option>
                 <option>Did not meet admission requirements in time</option>
                 <option>Other</option>
